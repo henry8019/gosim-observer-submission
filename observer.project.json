@@ -1,0 +1,16 @@
+{
+  "schema_version": "observer-project-v1",
+  "protocol": "jsonl-v2",
+  "image": "python:3.12-slim",
+  "build": [],
+  "run": [
+    "python3",
+    "-I",
+    "-u",
+    "run_agent.py"
+  ],
+  "working_directory": ".",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

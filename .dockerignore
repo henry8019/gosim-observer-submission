@@ -1,0 +1,6 @@
+**
+!agent/
+!agent/*.py
+!Dockerfile
+!run_agent.py
+!settings.json
