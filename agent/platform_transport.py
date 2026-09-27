@@ -49,8 +49,9 @@ class PlatformRelay:
             raw = exc.read(16385)
             try:
                 body = json.loads(raw) if len(raw) <= 16384 else None
-                detail = body.get('error') if isinstance(body, dict) else None
-                unsupported = detail == 'unsupported' or isinstance(detail, dict) and detail.get('message') == 'unsupported'
+                detail = body.get('error', body) if isinstance(body, dict) else None
+                label = detail.get('message', detail.get('code', '')) if isinstance(detail, dict) else detail
+                unsupported = isinstance(label, str) and label.strip().lower() == 'unsupported'
             except (ValueError, TypeError):
                 unsupported = False
             restored = error.HTTPError(exc.url, exc.code, exc.reason, exc.headers, io.BytesIO(raw))
