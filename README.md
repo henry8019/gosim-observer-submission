@@ -1,5 +1,7 @@
 # DeepSeek 观测智能体：排程收益校验版
 
+2026-09-27 云端诊断更新：已评分批次为 9358.93／15148.05。14 夜日志中的三次模型调用均返回 HTTP 400，实际使用离线排程，不能算作模型参与成功。本次仅增加固定白名单错误分类，不记录响应正文、请求凭证或个人数据；排程与配置不变。模型代理兼容性仍待本次接口测试确认。
+
 Python 3.11+ 标准库。先在进程环境设置 MODEL_API_KEY，再运行 `python -I run_agent.py`。标准输入／输出为 JSON Lines，API 地址 https://api.deepseek.com。
 
 云端完整项目通过根目录 observer.project.json 启动，使用 python:3.12-slim，无需安装第三方依赖。平台提供 OPENAI_BASE_URL / OPENAI_API_KEY 临时凭证，连接层优先通过该代理转发原始 DeepSeek 请求；永久密钥只在参赛页配置。官网模型栏须选择 deepseek-flash，因为平台会替换请求里的模型名。

@@ -15,6 +15,41 @@ class ModelError(ValueError):
     """A safe error code; never contains provider response bodies or credentials."""
 
 
+def http_error_code(exc):
+    """Classify a bounded error body into fixed labels, without logging its text."""
+    base = 'model_http_' + str(exc.code)
+    try:
+        raw = exc.read(16385)
+        if len(raw) > 16384:
+            return base + ':body_too_large'
+        value = json.loads(raw)
+        detail = value.get('error', value) if isinstance(value, dict) else {}
+        if not isinstance(detail, dict):
+            return base
+        message = str(detail.get('message', '')).lower()
+        code = str(detail.get('code', '')).lower()
+        fields = ('thinking', 'reasoning_effort', 'max_tokens', 'max_completion_tokens',
+                  'response_format', 'messages', 'model', 'temperature', 'stream')
+        parameter = detail.get('param')
+        labels = []
+        for field in fields:
+            if parameter == field or field in message:
+                labels.append(field)
+        for name, patterns in (
+            ('unsupported', ('unsupported', 'not supported', 'not allowed', 'unknown parameter', 'unrecognized')),
+            ('invalid_model', ('model_not_found', 'model does not exist', 'invalid model')),
+            ('credential', ('invalid_api_key', 'authentication', 'api key')),
+            ('missing_configuration', ('not configured', 'not connected', 'missing model', 'no model')),
+            ('quota', ('insufficient_balance', 'insufficient_quota', 'insufficient balance')),
+            ('context_limit', ('context length', 'context_length_exceeded')),
+        ):
+            if any(pattern in message or pattern in code for pattern in patterns):
+                labels.append(name)
+        return base + (':' + ','.join(labels) if labels else ':unclassified')
+    except (ValueError, TypeError, AttributeError, OSError):
+        return base
+
+
 @dataclass(frozen=True)
 class ObserverSettings:
     mode: str = "offline"
@@ -179,7 +214,7 @@ class JsonModelClient:
         except ModelError:
             raise
         except error.HTTPError as exc:
-            raise ModelError("model_http_" + str(exc.code)) from None
+            raise ModelError(http_error_code(exc)) from None
         except (TimeoutError, socket.timeout):
             raise ModelError("model_timeout") from None
         except (error.URLError, OSError):
