@@ -35,11 +35,13 @@ def http_error_code(exc):
                   'endpoint', 'path', 'method', 'content-type', 'content_type',
                   'role', 'system', 'url', 'tool', 'json', 'encoding', 'proxy',
                   'header', 'query', 'request', 'scheme', 'client', 'session',
-                  'version', 'store', 'extra_body')
+                  'version', 'store', 'extra_body', 'provider', 'api', 'route',
+                  'operation', 'format', 'protocol', 'parameter', 'type', 'content',
+                  'completion', 'v1', 'v2')
         parameter = detail.get('param')
         labels = []
         for field in fields:
-            if parameter == field or field in message:
+            if parameter == field or field in message or field in code:
                 labels.append(field)
         for name, patterns in (
             ('unsupported', ('unsupported', 'not supported', 'not allowed', 'unknown parameter', 'unrecognized')),
