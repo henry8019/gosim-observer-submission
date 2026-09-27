@@ -24,12 +24,18 @@ def http_error_code(exc):
             return base + ':body_too_large'
         value = json.loads(raw)
         detail = value.get('error', value) if isinstance(value, dict) else {}
+        if isinstance(detail, str):
+            detail = {'message': detail}
         if not isinstance(detail, dict):
             return base
-        message = str(detail.get('message', '')).lower()
+        message = str(detail.get('message', detail.get('detail', ''))).lower()
         code = str(detail.get('code', '')).lower()
         fields = ('thinking', 'reasoning_effort', 'max_tokens', 'max_completion_tokens',
-                  'response_format', 'messages', 'model', 'temperature', 'stream')
+                  'response_format', 'messages', 'model', 'temperature', 'stream',
+                  'endpoint', 'path', 'method', 'content-type', 'content_type',
+                  'role', 'system', 'url', 'tool', 'json', 'encoding', 'proxy',
+                  'header', 'query', 'request', 'scheme', 'client', 'session',
+                  'version', 'store', 'extra_body')
         parameter = detail.get('param')
         labels = []
         for field in fields:
